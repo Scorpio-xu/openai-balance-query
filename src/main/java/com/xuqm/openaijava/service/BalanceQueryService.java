@@ -87,7 +87,7 @@ public class BalanceQueryService {
     private String invokeApi(String url, String apikey, Map<String, Object> formMap) {
         String result = HttpRequest.get(openAiConfig.getHost() + url)
             // 本地开发时用，上生产时记得去掉
-            .setHttpProxy("127.0.0.1", 7890)
+            // .setHttpProxy("127.0.0.1", 7890)
             // 设置表头
             .header(Header.CONTENT_TYPE, "application/json").header(Header.AUTHORIZATION, "Bearer " + apikey)
             // 设置待传的表单数据并传输
