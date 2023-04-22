@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>查询 OpenAI API 余额</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .heading {
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subheading {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            margin: 0;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        label {
+            font-size: 20px;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        input[type="text"] {
+            font-size: 18px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            flex: 1;
+            max-width: 500px;
+            width: 100%;
+            margin-right: 10px;
+        }
+
+        button[type="button"] {
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        button[type="button"]:hover {
+            background-color: #666;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+            text-align: center;
+            font-size: 20px;
+            color: #333;
+        }
+
+        @media (max-width: 800px) {
+            label {
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            input[type="text"] {
+                max-width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            button[type="button"] {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="heading">查询 OpenAI API 余额</h1>
+    <p class="subheading">本站不保存 KEY 信息，查询后请自行保存</p>
+    <form onsubmit="return false;">
+        <label for="apikey">请输入 API Key:</label>
+        <input type="text" id="apikey" name="apikey">
+        <button type="button" onclick="balanceQuery()">查询</button>
+    </form>
+    <div class="result" id="result"></div>
+</div>
+<script>
+    function balanceQuery() {
+        const apikey = document.getElementById("apikey").value;
+        const xhr = new XMLHttpRequest();
+        const url = "/balanceQuery?apikey=" + apikey;
+        xhr.open("GET", url);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const result = JSON.parse(xhr.responseText);
+                if (result.code === 0) {
+                    document.getElementById("result").innerHTML = "总余额：" + result.data.total + "<br>已使用：" + result.data.used + "<br>剩余余额：" + result.data.balance;
+                } else {
+                    document.getElementById("result").innerHTML = result.msg;
+                }
+            } else {
+                document.getElementById("result").innerHTML = "请求出错";
+            }
+        };
+        xhr.send();
+    }
+</script>
+</body>
+</html>
