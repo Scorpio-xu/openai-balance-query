@@ -1,0 +1,8 @@
+server:
+  port: 9090
+
+openai:
+  # 默认的openai apikey
+  key: ${KEY:}
+  # 访问OPENAI的域名
+  host: ${HOST:https://api.openai.com}
