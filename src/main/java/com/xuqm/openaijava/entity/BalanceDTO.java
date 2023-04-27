@@ -1,6 +1,7 @@
 package com.xuqm.openaijava.entity;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +21,7 @@ public class BalanceDTO {
     /**
      * 总额（美元）
      */
-    private Integer total;
+    private BigDecimal total;
 
     /**
      * 已使用（美元）
@@ -31,5 +32,10 @@ public class BalanceDTO {
      * 余额（美元）
      */
     private BigDecimal balance;
+
+    /**
+     * 每日消耗
+     */
+    private Map<String, BigDecimal> dailyCosts;
 
 }

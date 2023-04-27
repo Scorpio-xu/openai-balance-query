@@ -2,12 +2,18 @@ package com.xuqm.openaijava.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.xuqm.openaijava.config.OpenAiConfig;
 import com.xuqm.openaijava.entity.BalanceDTO;
+import com.xuqm.openaijava.entity.BillingUsage;
+import com.xuqm.openaijava.entity.DailyCost;
+import com.xuqm.openaijava.entity.LineItem;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -55,7 +61,7 @@ public class BalanceQueryService {
 
         // 获取总额
         String totalAmountResp = invokeApi(GET_SUBSCRIPTION_URL, apikey, null);
-        int total = JSONUtil.parseObj(totalAmountResp).getInt("hard_limit_usd");
+        BigDecimal total = JSONUtil.parseObj(totalAmountResp).getBigDecimal("hard_limit_usd");
 
         // 获取使用量
         // 组装参数，开始日期和结束日期为必填参数
@@ -65,15 +71,27 @@ public class BalanceQueryService {
             // 结束日期选择明天
             MapUtil.entry("end_date", DateUtil.tomorrow().toDateStr()));
         String usageResponse = invokeApi(GET_USAGE_URL, apikey, params);
-        BigDecimal used = JSONUtil.parseObj(usageResponse).getBigDecimal("total_usage")
+
+        // 每日使用详情
+        BillingUsage billingUsage = JSON.parseObject(usageResponse, new TypeReference<BillingUsage>() {});
+        Map<String, BigDecimal> dailyCosts = new LinkedHashMap<>();
+        for (DailyCost dailyCost : billingUsage.getDailyCosts()) {
+            String date = DateUtil.date(dailyCost.getTimestamp() * 1000).toDateStr();
+            BigDecimal dailyTotal = dailyCost.getLineItems().stream().map(LineItem::getCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add).divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP);
+            if (!BigDecimal.valueOf(0, 3).equals(dailyTotal)) {
+                dailyCosts.put(date, dailyTotal);
+            }
+        }
+        BigDecimal used = billingUsage.getTotalUsage()
             // 响应中的此单位是美分，故除以100进行转换
             .divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP);
 
         // 余额 = 总额 - 已使用
-        BigDecimal balance = BigDecimal.valueOf(total).subtract(used);
+        BigDecimal balance = total.subtract(used);
 
         // 返回结果
-        return new BalanceDTO(total, used, balance);
+        return new BalanceDTO(total, used, balance, dailyCosts);
     }
 
     /**
