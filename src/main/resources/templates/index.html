@@ -133,11 +133,13 @@
         const url = "/balanceQuery?apikey=" + apikey;
         xhr.open("GET", url);
         document.getElementById("result").innerHTML = "查询中，请稍等...";
+        document.getElementById("chart").style.display = "none";
         xhr.onload = function () {
             if (xhr.status === 200) {
                 const result = JSON.parse(xhr.responseText);
                 if (result.code === 0) {
-                    document.getElementById("result").innerHTML = "总余额：" + result.data.total + "<br>已使用：" + result.data.used + "<br>剩余余额：" + result.data.balance;
+                    document.getElementById("result").innerHTML = "总额：" + result.data.total + "<br>已使用：" + result.data.used + "<br>余额：" + result.data.balance;
+                    document.getElementById("chart").style.display = "block";
                     // 渲染柱状图
                     renderBarChart(result.data.dailyCosts);
                 } else {
