@@ -108,7 +108,7 @@
 <body>
 <div class="container">
     <h1 class="heading">查询 OpenAI API 消费情况</h1>
-    <p class="subheading">本站不保存 KEY 信息，查询后请自行保存</p>
+    <p class="subheading">本站不保存 KEY 信息，可点击<a href="https://github.com/Scorpio-xu/openai-balance-query">查看源码</a></p>
     <form onsubmit="event.preventDefault(); balanceQuery();">
         <label for="apikey">请输入 API Key:</label>
         <input type="text" id="apikey" name="apikey">
@@ -118,6 +118,14 @@
     <!-- 添加柱状图容器 -->
     <div id="chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
 </div>
+<footer>
+    <div class="container" style="text-align:center; margin-top: 20px; margin-bottom: 30px; font-size: 16px;">
+        <p>本站前端代码由 ChatGPT 生成，感谢 ChatGPT ，感谢这个时代的便利 🙏</p>
+        <a href="https://github.com/Scorpio-xu/openai-balance-query" target="_blank">
+            <img src="https://img.shields.io/badge/Scorpio--xu-openai--balance--query-759aa0?logo=github" alt="GitHub">
+        </a>
+    </div>
+</footer>
 <script>
     function balanceQuery() {
         const apikey = document.getElementById("apikey").value;
