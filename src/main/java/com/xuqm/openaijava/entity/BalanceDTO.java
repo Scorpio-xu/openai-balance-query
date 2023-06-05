@@ -38,4 +38,8 @@ public class BalanceDTO {
      */
     private Map<String, BigDecimal> dailyCosts;
 
+    /**
+     * 是否过期
+     */
+    private boolean expired;
 }

@@ -2,6 +2,7 @@ package com.xuqm.openaijava.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -10,10 +11,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.xuqm.openaijava.config.OpenAiConfig;
-import com.xuqm.openaijava.entity.BalanceDTO;
-import com.xuqm.openaijava.entity.BillingUsage;
-import com.xuqm.openaijava.entity.DailyCost;
-import com.xuqm.openaijava.entity.LineItem;
+import com.xuqm.openaijava.entity.*;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -59,16 +57,28 @@ public class BalanceQueryService {
             apikey = openAiConfig.getKey();
         }
 
-        // 获取总额
-        String totalAmountResp = invokeApi(GET_SUBSCRIPTION_URL, apikey, null);
-        BigDecimal total = JSONUtil.parseObj(totalAmountResp).getBigDecimal("hard_limit_usd");
+        // 获取订阅信息
+        String subscriptionResp = invokeApi(GET_SUBSCRIPTION_URL, apikey, null);
+        Subscription subscription = JSON.parseObject(subscriptionResp, new TypeReference<Subscription>() {});
+        BigDecimal total = subscription.getHardLimitUsd();
+
+        String startDate;
+        boolean expired = false;
+        if (subscription.isHasPaymentMethod()) {
+            // 付费账户从本月1号开始查
+            startDate = DateUtil.beginOfMonth(new DateTime()).toDateStr();
+        } else {
+            // 非付费账户从90天前起查
+            startDate = DateUtil.offsetDay(new DateTime(), -90).toDateStr();
+            // 判断此账户是否过期
+            if (new Date().getTime() > subscription.getAccessUntil() * 1000) {
+                expired = true;
+            }
+        }
 
         // 获取使用量
         // 组装参数，开始日期和结束日期为必填参数
-        Map<String, Object> params = MapUtil.ofEntries(
-            // 开始日期选择90天前
-            MapUtil.entry("start_date", DateUtil.offsetDay(new DateTime(), -90).toDateStr()),
-            // 结束日期选择明天
+        Map<String, Object> params = MapUtil.ofEntries(MapUtil.entry("start_date", startDate),
             MapUtil.entry("end_date", DateUtil.tomorrow().toDateStr()));
         String usageResponse = invokeApi(GET_USAGE_URL, apikey, params);
 
@@ -91,7 +101,7 @@ public class BalanceQueryService {
         BigDecimal balance = total.subtract(used);
 
         // 返回结果
-        return new BalanceDTO(total, used, balance, dailyCosts);
+        return new BalanceDTO(total, used, balance, dailyCosts, expired);
     }
 
     /**

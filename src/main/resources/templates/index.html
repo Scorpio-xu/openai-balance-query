@@ -79,6 +79,7 @@
 
         .result {
             margin-top: 20px;
+            margin-bottom: 20px;
             padding: 20px;
             border-radius: 5px;
             background-color: #f5f5f5;
@@ -108,13 +109,15 @@
 <body>
 <div class="container">
     <h1 class="heading">查询 OpenAI API 消费情况</h1>
-    <p class="subheading">本站不保存 KEY 信息，可点击<a href="https://github.com/Scorpio-xu/openai-balance-query">查看源码</a></p>
+    <p class="subheading">本站不保存 KEY 信息，可点击<a
+            href="https://github.com/Scorpio-xu/openai-balance-query">查看源码</a></p>
     <form onsubmit="event.preventDefault(); balanceQuery();">
         <label for="apikey">请输入 API Key:</label>
         <input type="text" id="apikey" name="apikey">
         <button type="button" onclick="balanceQuery()">查询</button>
     </form>
     <div class="result" id="result"></div>
+    <div class="subheading" id="msg"></div>
     <!-- 添加柱状图容器 -->
     <div id="chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
 </div>
@@ -133,12 +136,18 @@
         const url = "/balanceQuery?apikey=" + apikey;
         xhr.open("GET", url);
         document.getElementById("result").innerHTML = "查询中，请稍等...";
+        document.getElementById("msg").innerHTML = "";
         document.getElementById("chart").style.display = "none";
         xhr.onload = function () {
             if (xhr.status === 200) {
                 const result = JSON.parse(xhr.responseText);
                 if (result.code === 0) {
                     document.getElementById("result").innerHTML = "总额：" + result.data.total + "<br>已使用：" + result.data.used + "<br>余额：" + result.data.balance;
+                    if (result.data.expired) {
+                        document.getElementById("msg").innerHTML = "注：此apikey已过期，无法继续使用。";
+                    } else {
+                        document.getElementById("msg").innerHTML = "注：已付费apikey的总额为每月限额，未付费的为赠送金额。";
+                    }
                     document.getElementById("chart").style.display = "block";
                     // 渲染柱状图
                     renderBarChart(result.data.dailyCosts);
