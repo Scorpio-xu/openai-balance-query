@@ -5,106 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 引入 echarts 库 -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.0/dist/echarts.min.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            margin: 0;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .heading {
-            text-align: center;
-            font-size: 30px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .subheading {
-            text-align: center;
-            font-size: 18px;
-            color: #666;
-            margin: 0;
-        }
-
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        label {
-            font-size: 20px;
-            color: #333;
-            margin-right: 10px;
-        }
-
-        input[type="text"] {
-            font-size: 18px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            flex: 1;
-            max-width: 500px;
-            width: 100%;
-            margin-right: 10px;
-        }
-
-        button[type="button"] {
-            font-size: 18px;
-            padding: 10px 20px;
-            background-color: #333;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
-        }
-
-        button[type="button"]:hover {
-            background-color: #666;
-        }
-
-        .result {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 5px;
-            background-color: #f5f5f5;
-            text-align: center;
-            font-size: 20px;
-            color: #333;
-        }
-
-        @media (max-width: 800px) {
-            label {
-                display: block;
-                margin-bottom: 10px;
-            }
-
-            input[type="text"] {
-                max-width: 100%;
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-
-            button[type="button"] {
-                max-width: 100%;
-            }
-        }
-    </style>
+    <script src="/echarts.min.js"></script>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div class="container">
@@ -119,95 +21,16 @@
     <div class="result" id="result"></div>
     <div class="subheading" id="msg"></div>
     <!-- 添加柱状图容器 -->
-    <div id="chart" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+    <div id="chart" class="chart"></div>
 </div>
 <footer>
-    <div class="container" style="text-align:center; margin-top: 20px; margin-bottom: 30px; font-size: 16px;">
+    <div class="footer">
         <p>本站前端代码由 ChatGPT 生成，感谢 ChatGPT ，感谢这个时代的便利 🙏</p>
         <a href="https://github.com/Scorpio-xu/openai-balance-query" target="_blank">
             <img src="https://img.shields.io/badge/Scorpio--xu-openai--balance--query-759aa0?logo=github" alt="GitHub">
         </a>
     </div>
 </footer>
-<script>
-    function balanceQuery() {
-        const apikey = document.getElementById("apikey").value;
-        const xhr = new XMLHttpRequest();
-        const url = "/balanceQuery?apikey=" + apikey;
-        xhr.open("GET", url);
-        document.getElementById("result").innerHTML = "查询中，请稍等...";
-        document.getElementById("msg").innerHTML = "";
-        document.getElementById("chart").style.display = "none";
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                const result = JSON.parse(xhr.responseText);
-                if (result.code === 0) {
-                    document.getElementById("result").innerHTML = "总额：" + result.data.total + "<br>已使用：" + result.data.used + "<br>余额：" + result.data.balance;
-                    if (result.data.expired) {
-                        document.getElementById("msg").innerHTML = "注：此apikey已过期，无法继续使用。";
-                    } else {
-                        document.getElementById("msg").innerHTML = "注：已付费apikey的总额为每月限额，未付费的为赠送金额。";
-                    }
-                    document.getElementById("chart").style.display = "block";
-                    // 渲染柱状图
-                    renderBarChart(result.data.dailyCosts);
-                } else {
-                    document.getElementById("result").innerHTML = result.msg;
-                }
-            } else {
-                document.getElementById("result").innerHTML = "请求出错";
-            }
-        };
-        xhr.send();
-    }
-
-    function renderBarChart(dailyCosts) {
-        const chartData = [];
-        const dates = [];
-        const costs = [];
-        Object.keys(dailyCosts).forEach(function (date) {
-            dates.push(date);
-            costs.push(dailyCosts[date]);
-        });
-        chartData.push(dates);
-        chartData.push(costs);
-        const chart = echarts.init(document.getElementById("chart"));
-        const option = {
-            title: {
-                text: '每日消费情况',
-                left: 'center'
-            },
-            tooltip: {
-                trigger: 'axis'
-            },
-            xAxis: {
-                type: 'category',
-                data: chartData[0]
-            },
-            yAxis: {
-                type: 'value'
-            },
-            series: [{
-                data: chartData[1],
-                type: 'bar',
-                itemStyle: {
-                    color: '#759aa0',
-                    opacity: 0.7
-                },
-                emphasis: {
-                    itemStyle: {
-                        opacity: 1
-                    }
-                },
-                label: {
-                    show: true,
-                    position: 'top'
-                }
-            }]
-        };
-        chart.setOption(option);
-    }
-
-</script>
+<script src="/script.js"></script>
 </body>
 </html>
